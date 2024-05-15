@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from supabase import create_client, Client
 from connectDB import get_supabase
+from fastapi import RedirectResponse
 import random
 import time
 
@@ -8,8 +9,8 @@ app = FastAPI()
 # Supabase 설정
 supabase = get_supabase()
 
-
-async def select_Tag():
+@app.get("/No_Login_movies/")
+async def random_genre_movies():
     random.seed(time.time())
     
     try:
