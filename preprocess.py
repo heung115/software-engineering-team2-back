@@ -7,8 +7,6 @@ from get_config import POST_API_KEY
 from get_config import POST_BASE_URL
 from get_config import IMAGE_BASE_URL
 import time
-import csv
-import json
 
 
 # key : movieId, g_total_movie_data[key] = movie_data
@@ -33,9 +31,14 @@ PROFILE_URL = 9             # data type : String or None
 CAST_CHARACTER = 10         # data type : String or None
 CREW_JOB = 11               # data type : String or None
 
+# key : userId, g_total_user_data[key] = user_data
+g_total_user_data = {}
 
+# user_data is dinctionary, data format and keys
+USER_TAGS = 12             # data type : String array or None
+USER_STACK = 13             # data type : Integer array or None
 
-
+# 실제 DB 객체
 supabase = get_supabase()
 
 
@@ -143,8 +146,8 @@ def init_job(data):
 
 
 def init_multi_thread():
-    supabase = get_supabase()
-
+    """g_total_movie_data를 초기화하는 함수. 멀티 스레드를 이용.
+    """
     total_data = (supabase.table("Movies_Table").
                   select("movieId", count="exact").
                   order("movieId", desc=False).
@@ -176,20 +179,46 @@ def init_multi_thread():
                 t.join()
 
 
-def get_genre():
-    data = {'IMAX', 'Crime', 'Animation', 'Documentary', 'Romance', 'Mystery', 'Children', 'Musical', 'Film-Noir',
-            'Fantasy', 'Horror', 'Drama', 'Action', 'Etc', 'Thriller', 'Western', 'Sci-Fi', 'Comedy', 'Adventure',
-            'War'}
+def init_user_data():
+    """모든 사용자 데이터를 초기화 함.
+    """
+    total_data = (supabase.table("userinfo").
+                  select("id", count="exact").
+                  order("id", desc=False).
+                  execute().count)
 
-    for d in g_total_movie_data:
-        data |= g_total_movie_data[d][MOVIE_GENRE]
+    print(total_data)
 
-    return sorted(data, key=lambda x: "Z" if x == 'Etc' else x)
+    for i in range(0, total_data, 1000):
+        
+        res = (supabase.table("userinfo").
+               select("id").
+               order("id", desc=False).
+               range(i, i + 1000).
+               execute().data)
+        
+        for data in res:
+            userId = data['id']
+            userGenre = []
+            userStack = []
+            getUserData = supabase.table('Users_Table').select('UserStack, UserTags').eq("UserId", userId).execute().data
+
+            for userData in getUserData:
+                userGenre.append(userData['UserTags'])
+                userStack.append(userData['UserStack'])
+            
+            data = {
+                USER_TAGS: userGenre,
+                USER_STACK: userStack
+            }
+
+            g_total_user_data[userId] = data
 
 
 if __name__ == "__main__":
     s = time.time()
-    init_multi_thread()
+    # init_multi_thread()
+    init_user_data()
     e = time.time()
     print(f"{e - s:.3f}")
 
@@ -205,9 +234,9 @@ if __name__ == "__main__":
     #         file.write(json.dumps(g_total_movie_data[i]))
 
     print("len total data :", len(g_total_movie_data))
-    print(get_genre())
+    # print(get_genre())
     print("=====toy story====")
-    print(g_total_movie_data[69849])
+    # print(g_total_movie_data[69849])
     pass
 
 

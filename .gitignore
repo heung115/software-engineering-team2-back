@@ -45,6 +45,7 @@ __pycache__/
 
 # Distribution / packaging
 .idea/
+.vscode/
 .Python
 build/
 develop-eggs/
