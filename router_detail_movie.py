@@ -1,21 +1,23 @@
-from fastapi import FastAPI, HTTPException, APIRouter
+from fastapi import HTTPException, APIRouter
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neighbors import NearestNeighbors
 
+from role_db import get_story
+from role_db import get_actors
+from role_db import get_directors
 from Pre_Movie import get_movie
-from Pre_UserID import get_userid
 from Pre_Tag import get_tag
 from Pre_Rating import get_rating
 from Pre_Post import get_post
 
-app = FastAPI()
+
 detail_router = APIRouter()
 
 def load_data():
     movies_data = get_movie()
     links_data = get_post()
     ratings_data = get_rating()
-    user_data = get_userid()
+    user_data = []
     
     if not movies_data or not links_data or not ratings_data:
         raise HTTPException(status_code=404, detail="Data not found")
@@ -29,7 +31,13 @@ def prepare_dicts(ratings_data, links_data):
     return ratings_dict, links_dict
 
 def get_movie_by_id(movie_id, movies_data):
-    return next((movie for movie in movies_data if movie['movieId'] == movie_id), None)
+    for data in movies_data:
+        movieData = data
+
+        if movieData['movieId'] == movie_id:
+            return movieData
+
+    return None
 
 def create_tfidf_matrix(movies_data):
     tag_strings = []
@@ -37,14 +45,15 @@ def create_tfidf_matrix(movies_data):
 
     for movie in movies_data:
         tags_data = get_tag(movie['movieId'])
+        print("tags_data :", tags_data)
         if tags_data and isinstance(tags_data, list):
-            tag_string = ' '.join(tag['tag'] for tag in tags_data if 'tag' in tag)
+            tag_string = ' '.join(tag for tag in tags_data)
             tag_strings.append(tag_string)
-            movie_ids.append(movie['movieId'])
-
+            movie_ids.append(str(movie['movieId']))
+    
     vectorizer = TfidfVectorizer(stop_words=None, token_pattern=r'\b\w+\b')
     tfidf_matrix = vectorizer.fit_transform(tag_strings)
-    
+
     return tfidf_matrix, movie_ids
 
 def get_similar_movies(movie_id, tfidf_matrix, movie_ids, k=12):
@@ -63,8 +72,10 @@ def get_similar_movies(movie_id, tfidf_matrix, movie_ids, k=12):
 async def get_movie_detail(movie_id: str):
     try:
         movies_data, links_data, ratings_data, user_data = load_data()
+
         ratings_dict, links_dict = prepare_dicts(ratings_data, links_data)
         
+
         movie = get_movie_by_id(movie_id, movies_data)
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
@@ -86,7 +97,9 @@ async def get_movie_detail(movie_id: str):
             'scope': ratings_dict.get(movie_id, 5),
             'title': movie['title'],
             'genres': movie['genres'],
-            'description': '',  # 일단 빈 문자열로 설정
+            'actors': get_actors(movie_id),
+            'directors': get_directors(movie_id),
+            'description': get_story(movie_id),  # 일단 빈 문자열로 설정
             'more-like-this': more_like_this
         }
 
@@ -94,5 +107,3 @@ async def get_movie_detail(movie_id: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-app.include_router(detail_router)

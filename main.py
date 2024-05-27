@@ -1,8 +1,13 @@
 from fastapi import FastAPI
-from fastapi import APIRouter
-from Main_genre import to_router
-from genre import router
+from router_movie_list import movie_list_router
+from router_genre import genre_router
+from router_detail_movie import detail_router
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+
+
+from preprocess import init_multi_thread
+from preprocess import init_user_data
 
 
 app = FastAPI()
@@ -31,5 +36,11 @@ def root():
 def home():
     return {"message": "home"}
 
-app.include_router(router=router)
-app.include_router(router=to_router)
+app.include_router(genre_router)
+app.include_router(movie_list_router)
+app.include_router(detail_router)
+
+if __name__ == "__main__":
+    init_multi_thread()
+    init_user_data()
+    uvicorn.run(app, host="127.0.0.1", port = 8000)

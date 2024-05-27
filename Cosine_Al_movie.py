@@ -24,7 +24,8 @@ def recommend_movies_by_similarity(filtered_movies, user_tags_string, links_dict
                 "title": movie_title,
                 "describe": overview,
                 "cover_url": poster,
-                "similarity_score": round(similarity_score, 3)
+                "similarity_score": round(similarity_score, 3),
+                'movie_id': movie_id
             })
     
     recommended_movies.sort(key=lambda x: x['similarity_score'], reverse=True)
