@@ -199,6 +199,8 @@ def update_users(uuid, genres):
         for genre in genres:
             supabse.table('Users_Table').insert({"UserId": uuid, "UserStack": 0, "UserTags": genre}).execute()
         
+        init_user_data()
+
         return True
     
     return False
