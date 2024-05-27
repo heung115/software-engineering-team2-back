@@ -6,11 +6,11 @@ from Pre_Rating import get_rating
 from Pre_Post import get_post
 
 
-def load_data():
+def load_data(uuid):
     movies_data = get_movie()
     links_data = get_post()
     ratings_data = get_rating()
-    user_data = get_userid()
+    user_data = get_userid(uuid)
     
     if not movies_data or not links_data or not ratings_data:
         raise HTTPException(status_code=404, detail="Data not found")

@@ -60,31 +60,31 @@ def init_crew_cast(tm_db_id):
     cast = {}
     if "cast" not in response:
         cast = None
-        print("none cast :", tm_db_id)
-        print("response :", response.keys())
+        # print("none cast :", tm_db_id)
+        # print("response :", response.keys())
     else:
         for d in response["cast"]:
             imagePath = d["profile_path"]
             cast[d["original_name"]] = {
-                "profile_path": (
+                PROFILE_URL: (
                     (IMAGE_BASE_URL + d["profile_path"]) if imagePath else None
                 ),
-                "character": d["character"],
+                CAST_CHARACTER: d["character"],
             }
 
     crew = {}
     if "crew" not in response:
         crew = None
-        print("none crew :", tm_db_id)
-        print("response :", response.keys())
+        # print("none crew :", tm_db_id)
+        # print("response :", response.keys())
     else:
         for d in response["crew"]:
             imagePath = d["profile_path"]
             crew[d["original_name"]] = {
-                "profile_path": (
+                PROFILE_URL: (
                     (IMAGE_BASE_URL + d["profile_path"]) if imagePath else None
                 ),
-                "job": d["known_for_department"],
+                CREW_JOB: d["known_for_department"],
             }
 
     return [cast, crew]
@@ -98,7 +98,7 @@ def init_job(data):
     :return: None
     """
     # 기본 정보
-    movie_id = data["movieId"]
+    movie_id = str(data["movieId"])
     movie_title = data["title"]
     movie_poster = data["poster_url"]
     movie_overview = data["overview"]
@@ -176,14 +176,14 @@ def init_multi_thread():
 
     print(total_data)
     thread_count = 16
-    for i in range(0, total_data, 1000):
+    for i in range(0, 1000, 1000):
         print(i, "/", total_data)
 
         res = (
             supabase.table("Movies_Table")
             .select("movieId, title, poster_url, overview, story_line")
             .order("movieId", desc=False)
-            .range(i, i + 1000)
+            .range(i, i + 50)
             .execute()
             .data
         )
@@ -202,6 +202,7 @@ def init_multi_thread():
             for t in threads:
                 t.join()
 
+    print(g_total_movie_data.keys())
 
 def init_user_data():
     """모든 사용자 데이터를 초기화 함."""
