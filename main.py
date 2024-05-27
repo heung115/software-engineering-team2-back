@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from router_movie_list import movie_list_router
 from router_genre import genre_router
 from router_detail_movie import detail_router
+from router_save_prefered import prefer_genres_router
+from router_search import search_router
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
@@ -39,6 +41,8 @@ def home():
 app.include_router(genre_router)
 app.include_router(movie_list_router)
 app.include_router(detail_router)
+app.include_router(prefer_genres_router)
+app.include_router(search_router)
 
 if __name__ == "__main__":
     init_multi_thread()
