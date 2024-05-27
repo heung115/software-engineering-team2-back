@@ -214,8 +214,6 @@ def init_user_data():
         .count
     )
 
-    print(total_data)
-
     for i in range(0, total_data, 1000):
 
         res = (
@@ -247,6 +245,7 @@ def init_user_data():
 
             g_total_user_data[userId] = data
 
+    print(g_total_user_data)
 
 if __name__ == "__main__":
     s = time.time()
