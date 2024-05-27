@@ -3,6 +3,7 @@ from preprocess import init_multi_thread
 from preprocess import g_total_user_data
 from preprocess import init_user_data
 import preprocess as pc
+from connectDB import get_supabase
 
 
 def _check_movie_init():
@@ -188,3 +189,37 @@ def check_user_id(uuid):
     if uuid in g_total_user_data:
         return True
     return False
+
+
+def update_users(uuid, genres):
+
+    if check_user_id(uuid):
+        supabse = get_supabase()
+
+        for genre in genres:
+            supabse.table('Users_Table').insert({"UserId": uuid, "UserStack": 0, "UserTags": genre}).execute()
+        
+        return True
+    
+    return False
+
+
+def get_movie_by_key_word(key):
+    _check_movie_init()
+
+    res = []
+
+    for movieId in g_total_movie_data:
+        movie_data = g_total_movie_data[movieId]
+
+        if movie_data[pc.MOVIE_TITLE].replace(" ", "").lower().find(key) != -1:
+            data = {
+                'cover_url': movie_data[pc.MOVIE_POSTER],
+	            'movieId': movieId,
+	            'scope': movie_data[pc.MOVIE_SCOPE],
+	            'title': movie_data[pc.MOVIE_TITLE],
+            }
+
+            res.append(data)
+
+    return res
