@@ -8,4 +8,4 @@ def filter_movies_by_genre(movies_data, genre):
     if not filtered_movies:
         raise HTTPException(status_code=404, detail=f"No movies found for the genre: {genre}")
     
-    return random.sample(filtered_movies, min(20, len(filtered_movies)))
+    return random.sample(filtered_movies, min(21, len(filtered_movies)))
