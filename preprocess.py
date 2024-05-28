@@ -148,6 +148,10 @@ def init_job(data):
     )
     movie_tag = [data["tag"] for data in getTag]
 
+    if not movie_tag:
+        movie_tag = list(movie_genre)
+
+
     res = {
         MOVIE_TITLE: movie_title,
         MOVIE_POSTER: movie_poster,
@@ -175,15 +179,15 @@ def init_multi_thread():
     )
 
     print(total_data)
-    thread_count = 16
-    for i in range(0, 1000, 1000):
+    thread_count = 8
+    for i in range(0, total_data, 1000):
         print(i, "/", total_data)
 
         res = (
             supabase.table("Movies_Table")
             .select("movieId, title, poster_url, overview, story_line")
             .order("movieId", desc=False)
-            .range(i, i + 50)
+            .range(i, i + 1000)
             .execute()
             .data
         )
