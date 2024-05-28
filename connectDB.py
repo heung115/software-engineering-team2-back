@@ -1,9 +1,28 @@
+import os
 from supabase import create_client, Client
+from starlette.config import Config
+from fastapi import APIRouter
+
+router = APIRouter()
+
 
 def get_supabase():
-    SUPABASE_URL = 'https://hzjtppomzpnezqwcrhuv.supabase.co'  # 여기에 Supabase 프로젝트 URL 입력
-    SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6anRwcG9tenBuZXpxd2NyaHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTM5OTM0MDUsImV4cCI6MjAyOTU2OTQwNX0.z-0rXCD65TjPakQAoaIb-TVk1PAMI9NRxO2_ndvekbU'
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    # Heroku 환경 변수 사용 여부를 확인하는 플래그
+    is_heroku = os.getenv("ENV") == "HEROKU"
 
-    
+    if is_heroku:
+        # Heroku 환경 변수 직접 사용
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+        SUPABASE_API = os.getenv("SUPABASE_API")
+    else:
+        # .env 파일 로드
+        config = Config(".env")
+        # 환경 변수 설정
+        SUPABASE_URL = config("SUPABASE_URL")
+        SUPABASE_API = config("SUPABASE_API")
+
+    if not SUPABASE_URL or not SUPABASE_API:
+        raise ValueError("Supabase URL과 API 키가 설정되어야 합니다.")
+
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_API)
     return supabase
