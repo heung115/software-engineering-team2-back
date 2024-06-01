@@ -13,13 +13,10 @@ def _check_movie_init():
         init_multi_thread()
 
 
-def _check_user_init(userId):
+def _check_user_init():
     """모든 사용자 데이터가 초기화 되었는 지 확인.
-
-    Args:
-        userId (uuid{String}): 초기화 되었더라고 있어야 하는 사용자 ID
     """
-    if not g_total_user_data or userId not in g_total_user_data:
+    if not g_total_user_data:
         init_user_data()
 
 
@@ -99,7 +96,7 @@ def g_get_tag(movie_id):
 
     res = g_total_movie_data[str(movie_id)][pc.MOVIE_TAGS]
 
-    print("res")
+    # print("res")
 
     return res
 
@@ -174,36 +171,55 @@ def g_get_user_id(user_id):
     Returns:
         Dictionary: {"UserId": uuid, "UserTags": Genre array}
     """
-    _check_user_init(user_id)
-    
+    _check_user_init()
+
+    check_user_id(user_id)
+
     if user_id in g_total_user_data:
         return {"UserId": user_id,
             "UserTags": g_total_user_data[user_id][pc.USER_TAGS]}
     else:
         return {"UserId": None, "UserTags": None}
-    
+
+
+def get_all_user_id():
+
+    return list(g_total_user_data.keys())
+
 
 def check_user_id(uuid):
-    _check_user_init(uuid)
+    _check_user_init()
+
+    if uuid == 'no-id':
+        return True
 
     if uuid in g_total_user_data:
         return True
+    else:
+        res = get_supabase().table("userinfo").select("id").eq("id", uuid).execute().data
+        if res:
+            g_total_user_data[uuid] = {pc.USER_STACK: [], pc.USER_TAGS: []}
+            return True
     return False
 
 
 def update_users(uuid, genres):
+    _check_user_init()
 
-    if check_user_id(uuid):
-        supabse = get_supabase()
+    if not check_user_id(uuid):
+        return False
 
-        for genre in genres:
-            supabse.table('Users_Table').insert({"UserId": uuid, "UserStack": 0, "UserTags": genre}).execute()
-        
-        init_user_data()
+    supabse = get_supabase()
 
-        return True
+    if g_total_user_data[uuid][pc.USER_TAGS]:
+        supabse.table("Users_Table").delete().eq('UserId', uuid).execute()
+
+    for genre in genres:
+        supabse.table('Users_Table').insert({"UserId": uuid, "UserStack": 0, "UserTags": genre}).execute()
     
-    return False
+    g_total_user_data[uuid][pc.USER_TAGS] = list(genres)
+
+    return True
 
 
 def get_movie_by_key_word(key):
@@ -225,3 +241,7 @@ def get_movie_by_key_word(key):
             res.append(data)
 
     return res
+
+
+if __name__ == "__main__":
+    pass

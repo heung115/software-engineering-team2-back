@@ -1,12 +1,13 @@
 from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 
-from role_db import update_users
+import threading
+from router_movie_list import add_job
 
+from role_db import update_users
+from role_db import get_genre
 
 prefer_genres_router = APIRouter()
-
-
 
 
 class PreferGenres(BaseModel):
@@ -15,8 +16,11 @@ class PreferGenres(BaseModel):
 
 
 @prefer_genres_router.post("/prefer-genres")
-async def get_movie_detail(item: PreferGenres):
+def get_movie_detail(item: PreferGenres):
     try:
+        genres = ['recommend'] + get_genre()[:-1] 
+        add_job(item.id, genres)
+
         res = update_users(item.id, item.genres)
         
         return {"res": res}
