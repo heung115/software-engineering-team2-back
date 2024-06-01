@@ -45,8 +45,8 @@ def create_tfidf_matrix(movies_data):
 
     for movie in movies_data:
         tags_data = get_tag(movie['movieId'])
-        print("tags_data :", tags_data)
-        if tags_data and isinstance(tags_data, list):
+        # if tags_data and isinstance(tags_data, list):
+        if tags_data:
             tag_string = ' '.join(tag for tag in tags_data)
             tag_strings.append(tag_string)
             movie_ids.append(str(movie['movieId']))
