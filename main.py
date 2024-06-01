@@ -10,6 +10,8 @@ import uvicorn
 
 from preprocess import init_multi_thread
 from preprocess import init_user_data
+from router_movie_list import pre_process_user
+from router_movie_list import make_work_thread
 
 
 app = FastAPI()
@@ -47,4 +49,6 @@ app.include_router(search_router)
 if __name__ == "__main__":
     init_multi_thread()
     init_user_data()
+    pre_process_user()
+    make_work_thread()
     uvicorn.run(app, host="127.0.0.1", port = 8000)

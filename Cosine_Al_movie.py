@@ -3,6 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from Pre_Tag import get_tag
 
+
 def recommend_movies_by_similarity(filtered_movies, user_tags_string, links_dict):
     vectorizer = TfidfVectorizer(stop_words=None, token_pattern=r'\b\w+\b')
     user_tfidf = vectorizer.fit_transform([user_tags_string])
@@ -11,8 +12,9 @@ def recommend_movies_by_similarity(filtered_movies, user_tags_string, links_dict
     for movie in filtered_movies:
         movie_id = movie['movieId']
         tags_data = get_tag(movie_id)
-        if tags_data and isinstance(tags_data, list):
-            movie_tags_string = ' '.join(tag['tag'] for tag in tags_data if 'tag' in tag)
+        # if tags_data and isinstance(tags_data, list):
+        if tags_data:
+            movie_tags_string = ' '.join(tags_data)
             movie_tfidf = vectorizer.transform([movie_tags_string])
             similarity_score = cosine_similarity(user_tfidf, movie_tfidf)[0][0]
             
