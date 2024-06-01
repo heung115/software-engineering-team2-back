@@ -180,7 +180,7 @@ def init_multi_thread():
 
     print(total_data)
     thread_count = 8
-    for i in range(0, total_data, 1000):
+    for i in range(0, 1000, 1000):
         print(i, "/", total_data)
 
         res = (
@@ -248,8 +248,7 @@ def init_user_data():
             data = {USER_TAGS: userGenre, USER_STACK: userStack}
 
             g_total_user_data[userId] = data
-
-    print(g_total_user_data)
+            
 
 if __name__ == "__main__":
     s = time.time()
